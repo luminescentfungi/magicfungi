@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Sender</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">✉️</div>
+            <h1>Send a Message</h1>
+            <p class="subtitle">Share your thoughts with us</p>
+            
+            <form id="messageForm">
+                <textarea 
+                    id="messageText" 
+                    placeholder="Type your message here..." 
+                    required
+                    rows="6"
+                ></textarea>
+                
+                <button type="submit" id="submitBtn">
+                    <span class="btn-text">Send Message</span>
+                    <span class="btn-loading">Sending...</span>
+                </button>
+            </form>
+            
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
