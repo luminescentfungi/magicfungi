@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Message Sender</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="container">
@@ -27,10 +29,27 @@
                 </button>
             </form>
             
+            <button type="button" id="viewMapBtn" class="secondary-btn">
+                <span>🗺️ See Thoughts</span>
+            </button>
+            
             <div class="status-message" id="statusMessage"></div>
         </div>
     </div>
 
+    <!-- Map Modal -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-container">
+            <div class="map-header">
+                <h2>Thoughts Map</h2>
+                <button id="closeMapBtn" class="close-btn">×</button>
+            </div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS for maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

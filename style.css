@@ -133,6 +133,22 @@ button.loading .btn-loading {
     display: inline;
 }
 
+/* Secondary button for "See Thoughts" */
+.secondary-btn {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+    padding: 12px;
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+.secondary-btn:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-color: #764ba2;
+    color: #764ba2;
+}
+
 .status-message {
     margin-top: 20px;
     padding: 15px;
@@ -160,6 +176,108 @@ button.loading .btn-loading {
     border: 1px solid #f5c6cb;
 }
 
+/* Map Modal Styles */
+.map-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.map-modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.map-container {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 900px;
+    height: 80vh;
+    max-height: 700px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    border-bottom: 2px solid #e0e0e0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.map-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+#map {
+    flex: 1;
+    width: 100%;
+    position: relative;
+}
+
+/* Leaflet popup customization */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.leaflet-popup-content {
+    margin: 10px;
+    font-family: inherit;
+}
+
 /* Responsive design */
 @media (max-width: 600px) {
     .card {
@@ -172,5 +290,31 @@ button.loading .btn-loading {
     
     .subtitle {
         font-size: 14px;
+    }
+    
+    .map-container {
+        height: 90vh;
+        border-radius: 15px;
+    }
+    
+    .map-header {
+        padding: 15px 20px;
+    }
+    
+    .map-header h2 {
+        font-size: 20px;
+    }
+}
+
+/* Loading animation for map markers */
+@keyframes markerPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
     }
 }
