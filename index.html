@@ -12,7 +12,7 @@
     <div class="container">
         <div class="card">
             <div class="icon">✉️</div>
-            <h1>Send a Message</h1>
+            <h1>Myceli Barcelona</h1>
             <p class="subtitle">Share your thoughts with us</p>
             
             <form id="messageForm">
@@ -24,7 +24,7 @@
                 ></textarea>
                 
                 <button type="submit" id="submitBtn">
-                    <span class="btn-text">Send Message</span>
+                    <span class="btn-text">Share</span>
                     <span class="btn-loading">Sending...</span>
                 </button>
             </form>
@@ -51,5 +51,71 @@
     <!-- Leaflet JS for maps -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
+    <script>
+      const titles = [
+        "Leave a thought. Let it take root.",
+        "What is growing in your mind today?",
+        "Plant a thought in the city.",
+        "Whisper something to Barcelona.",
+        "Let your mind touch the network.",
+        "Drop a spore.",
+        "What is quietly alive inside you?",
+        "Add your voice to the hive.",
+        "Feed the collective mind.",
+        "Let the network think with you.",
+        "Contribute to the shared cortex.",
+        "We think together.",
+        "Become part of the living mind.",
+        "What should Barcelona be thinking about?",
+        "Tell the city what’s on your mind.",
+        "Let your thought echo through the streets.",
+        "Leave something for strangers to feel.",
+        "What does the city need to hear?",
+        "Share something small.",
+        "What are you carrying today?",
+        "Say something you can’t say out loud.",
+        "Leave a trace of your inner world.",
+        "What’s one thing you wish someone knew?",
+        "Write a thought…",
+        "Plant it here…",
+        "Spore…",
+        "Contribute…",
+        "Leave a trace…",
+        "Speak to the underground…"
+      ];
+
+      const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+      document.querySelector(".subtitle").textContent = randomTitle;
+    </script>
+
+    <script>
+      const placeholders = [
+        "Plant a thought…",
+        "Drop a spore…",
+        "Leave a trace…",
+        "Whisper something…",
+        "Feed the hive…",
+        "Say something small…",
+        "What’s growing in you?",
+        "Add your voice…",
+        "One small thought…",
+        "Let it take root…"
+      ];
+
+      const textarea = document.getElementById("messageText");
+
+      function setRandomPlaceholder() {
+        if (textarea.value === "") {
+          const random = placeholders[Math.floor(Math.random() * placeholders.length)];
+          textarea.placeholder = random;
+        }
+      }
+
+      // Set once on load
+      setRandomPlaceholder();
+
+      // Optional: rotate every 5 seconds (only if empty)
+      setInterval(setRandomPlaceholder, 5000);
+    </script>
 </body>
 </html>
