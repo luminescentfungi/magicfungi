@@ -8,6 +8,7 @@ const CONFIG = {
 // Get form elements
 const form = document.getElementById('messageForm');
 const messageText = document.getElementById('messageText');
+const dontPropagateCheckbox = document.getElementById('dontPropagate');
 const submitBtn = document.getElementById('submitBtn');
 const statusMessage = document.getElementById('statusMessage');
 const viewMapBtn = document.getElementById('viewMapBtn');
@@ -105,16 +106,6 @@ form.addEventListener('submit', async (e) => {
     hideStatus();
     
     try {
-        // Get current location
-        let location;
-        try {
-            location = await getCurrentLocation();
-        } catch (locationError) {
-            console.warn('Could not get location:', locationError);
-            // Use default location if geolocation fails
-            location = { latitude: 0, longitude: 0 };
-        }
-        
         // Send message to Telegram
         const telegramResponse = await fetch(`https://api.telegram.org/bot${CONFIG.botToken}/sendMessage`, {
             method: 'POST',
@@ -127,11 +118,34 @@ form.addEventListener('submit', async (e) => {
                 parse_mode: 'HTML'
             })
         });
+
+        if (dontPropagateCheckbox.checked) {
+            showStatus('Message sent successfully (not propagated) ✓', 'success');
+            submitBtn.classList.remove('loading');
+            return;
+        }
+
+        // Get current location
+        let location;
+        try {
+            location = await getCurrentLocation();
+        } catch (locationError) {
+            console.warn('Could not get location:', locationError);
+            // Use default location if geolocation fails
+            location = { latitude: 0, longitude: 0 };
+        }
         
         const telegramData = await telegramResponse.json();
         
         if (!telegramData.ok) {
             throw new Error(telegramData.description || 'Failed to send message to Telegram');
+        }
+
+        // If location is 0,0, we just return
+        if (location.latitude === 0 && location.longitude === 0) {
+            showStatus('Message sent successfully, but location is unavailable. ✓', 'success');
+            submitBtn.classList.remove('loading');
+            return;
         }
         
         // Save thought to JSON with location as key
@@ -269,3 +283,145 @@ statusMessage.addEventListener('transitionend', () => {
         }, 5000);
     }
 });
+
+// ── 5-tap secret popup ──────────────────────────────────────────────────────
+
+let tapCount = 0;
+let tapTimer = null;
+
+document.body.addEventListener('click', () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+
+    if (tapCount >= 5) {
+        tapCount = 0;
+        openThoughtsManager();
+        return;
+    }
+
+    tapTimer = setTimeout(() => { tapCount = 0; }, 800);
+});
+
+// Create the popup DOM once
+const managerOverlay = document.createElement('div');
+managerOverlay.id = 'managerOverlay';
+Object.assign(managerOverlay.style, {
+    display: 'none',
+    position: 'fixed', inset: '0',
+    background: 'rgba(0,0,0,0.6)',
+    zIndex: '9999',
+    justifyContent: 'center',
+    alignItems: 'center'
+});
+
+const managerBox = document.createElement('div');
+Object.assign(managerBox.style, {
+    background: '#fff',
+    borderRadius: '12px',
+    padding: '20px',
+    width: 'min(90vw, 480px)',
+    maxHeight: '70vh',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+});
+
+const managerTitle = document.createElement('h3');
+managerTitle.textContent = '🗂 Thought Manager';
+Object.assign(managerTitle.style, { margin: '0', fontSize: '1.1rem', color: '#333' });
+
+const managerList = document.createElement('div');
+Object.assign(managerList.style, {
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    flexGrow: '1'
+});
+
+managerBox.appendChild(managerTitle);
+managerBox.appendChild(managerList);
+managerOverlay.appendChild(managerBox);
+document.body.appendChild(managerOverlay);
+
+// Close when clicking outside the box
+managerOverlay.addEventListener('click', (e) => {
+    if (e.target === managerOverlay) closeThoughtsManager();
+});
+
+function closeThoughtsManager() {
+    managerOverlay.style.display = 'none';
+    managerList.innerHTML = '';
+}
+
+async function openThoughtsManager() {
+    managerList.innerHTML = '<em style="color:#888">Loading…</em>';
+    managerOverlay.style.display = 'flex';
+
+    const thoughtsObj = await loadThoughtsJson();
+    const entries = Object.entries(thoughtsObj).filter(([key]) => {
+        const parts = key.split(',');
+        if (parts.length !== 2) return false;
+        const [lat, lng] = parts.map(Number);
+        return !isNaN(lat) && !isNaN(lng);
+    });
+
+    managerList.innerHTML = '';
+
+    if (entries.length === 0) {
+        managerList.innerHTML = '<em style="color:#888">No thoughts stored.</em>';
+        return;
+    }
+
+    entries.forEach(([locationKey, thought]) => {
+        const btn = document.createElement('button');
+        btn.textContent = `${locationKey}  →  ${thought}`;
+        Object.assign(btn.style, {
+            textAlign: 'left',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            border: '1px solid #ff0000',
+            background: '#ff0000',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            transition: 'background 0.2s, color 0.2s'
+        });
+
+        btn.addEventListener('click', async () => {
+            if (btn.dataset.deleted) return;           // already deleted
+            btn.dataset.deleted = '1';
+
+            // Optimistically gray it out
+            Object.assign(btn.style, {
+                background: '#e0e0e0',
+                color: '#aaa',
+                cursor: 'default',
+                border: '1px solid #ccc'
+            });
+            btn.textContent = `🗑 ${btn.textContent}`;
+
+            try {
+                const latest = await loadThoughtsJson();
+                delete latest[locationKey];
+                await saveThoughtsJson(latest);
+            } catch (err) {
+                // Revert on failure
+                delete btn.dataset.deleted;
+                Object.assign(btn.style, {
+                    background: '#f9f9f9',
+                    color: '',
+                    cursor: 'pointer',
+                    border: '1px solid #ddd'
+                });
+                btn.textContent = btn.textContent.replace('🗑 ', '');
+                alert('Failed to delete: ' + err.message);
+            }
+        });
+
+        managerList.appendChild(btn);
+    });
+}
